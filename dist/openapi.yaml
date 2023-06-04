@@ -68,52 +68,11 @@ paths:
       responses:
         "200":
           description: "the user has ben successfully logged out"
-  /users/favorites:
-    get:
-      tags:
-      - Users
-      summary: Return the favorite recipes that were saved by user
-      description: Get an array of recipes that were saved by a specific user
-      responses:
-        "200":
-          description: data about the user's favorites recipes returned
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/RecipePreview'
-        "401":
-          description: user is not authorized
-      security:
-      - cookieAuth: []
-    post:
-      tags:
-      - Users
-      summary: save recipe in the favorites list of a user
-      description: save recipe in the favorites list of a user
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                reciepeId:
-                  type: string
-                  description: reciepe's id which the user saved
-                  example: 716429
-      responses:
-        "200":
-          description: The Recipe successfully saved as favorite
-        "401":
-          description: user is not authorized
-      security:
-      - cookieAuth: []
   /recipes/{recipeId}:
     get:
       tags:
       - Recipes
-      summary: Return preview details on recipe by his ID
+      summary: Return preview details on recipe by his ID from the api
       description: Return preview details on recipe by his ID
       parameters:
       - name: recipeId
@@ -130,9 +89,284 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/RecipePreview'
+                $ref: '#/components/schemas/SmallRecipePreview'
         "404":
           description: recipeId is not exists
+  /recipes/expandepersonalRecipeData/{recipeId}:
+    get:
+      tags:
+      - Recipes
+      summary: Return expand details on recipe by his ID from the personal recipes
+      description: Return expand details on recipe by his ID from the personal recipes
+      parameters:
+      - name: recipeId
+        in: path
+        description: recipe's id
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+      responses:
+        "200":
+          description: expand data about the recipe
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/expandRecipePreviewPersonal'
+        "404":
+          description: recipeId is not exists
+  /recipes/expandeRecipeData/{recipeId}:
+    get:
+      tags:
+      - Recipes
+      summary: Return expand details on recipe by his ID from API
+      description: Return expand details on recipe by his ID from API
+      parameters:
+      - name: recipeId
+        in: path
+        description: recipe's id
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+      responses:
+        "200":
+          description: expand data about the recipe
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/expandRecipePreviewExternal'
+  /recipes/search:
+    get:
+      tags:
+      - Recipes
+      summary: Return list of recipes by the parameters in search
+      description: Return list of recipes by the parameters in search
+      parameters:
+      - name: query
+        in: query
+        description: recipe's name
+        required: true
+        explode: false
+        schema:
+          type: string
+      - name: number
+        in: query
+        description: number of return results
+        required: false
+        explode: false
+        schema:
+          type: integer
+      - name: sort
+        in: query
+        description: criteria to sort results
+        required: false
+        explode: false
+        schema:
+          type: string
+      - name: cuisine
+        in: query
+        description: cuisine
+        required: false
+        explode: false
+        schema:
+          type: string
+      - name: diet
+        in: query
+        description: diet
+        required: false
+        explode: false
+        schema:
+          type: string
+      - name: intolerance
+        in: query
+        description: intolerance
+        required: false
+        explode: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: list of recipe match to search
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/listResult'
+  /recipes/random:
+    get:
+      tags:
+      - Recipes
+      summary: Return 3 random recipes
+      description: Return 3 random recipes
+      responses:
+        "200":
+          description: 3 random recipes is disply
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/randomRecipes'
+  /users/getfavorites:
+    get:
+      tags:
+      - Users
+      summary: Return the favorite recipes that were saved by user
+      description: Get an array of recipes that were saved by a specific user
+      responses:
+        "200":
+          description: data about the user's favorites recipes returned
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RecipePreview'
+        "401":
+          description: user is not authorized
+  /users/addtofavorites:
+    post:
+      tags:
+      - Users
+      summary: save recipe in the favorites list of a user
+      description: save recipe in the favorites list of a user
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                recipeId:
+                  type: string
+                  description: reciepe's id which the user saved
+                  example: 716429
+      responses:
+        "200":
+          description: The Recipe successfully saved as favorite
+        "401":
+          description: user is not authorized
+  /users/addrecipetomeal/{recipeId}:
+    post:
+      tags:
+      - Users
+      summary: add recipe to meal
+      description: add recipe to meal
+      parameters:
+      - name: recipeId
+        in: path
+        description: recipe's id
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+      responses:
+        "200":
+          description: The Recipe successfully added to the plainning meal
+  /users/deleterecipetomeal/{recipeId}:
+    post:
+      tags:
+      - Users
+      summary: delete recipe from meal
+      description: delete recipe from meal
+      parameters:
+      - name: recipeId
+        in: path
+        description: recipe's id
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+      responses:
+        "200":
+          description: The Recipe successfully deleted from the plainning meal
+  /users/cleanrecipetomeal:
+    post:
+      tags:
+      - Users
+      summary: delete all recipe from meal
+      description: delete all recipe from meal
+      responses:
+        "200":
+          description: The plainning meal clean
+  /users/getpersonalrecipebyid/{recipeId}:
+    get:
+      tags:
+      - Users
+      summary: get personal recipe
+      description: get personal recipe
+      parameters:
+      - name: recipeId
+        in: path
+        description: recipe's id
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+      responses:
+        "200":
+          description: data about the recipe
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SmallRecipePreview'
+  /users/getpersonalrecipe:
+    get:
+      tags:
+      - Users
+      summary: get all personal recipe
+      description: get all personal recipe
+      responses:
+        "200":
+          description: data about the recipe
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/listRecipes'
+  /users/addpersonalrecipe:
+    post:
+      tags:
+      - Users
+      summary: add recipe to personal recipes
+      description: add recipe to personal recipes
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/addPersonalRecipes'
+        required: true
+      responses:
+        "200":
+          description: The Recipe successfully saved in your personal recipes list
+  /users/getfamilyrecipes:
+    get:
+      tags:
+      - Users
+      summary: get all family recipe
+      description: get all family recipe
+      responses:
+        "200":
+          description: data about the recipe
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/listFamilyRecipes'  
+  /users/getThreeLast:
+    get:
+      tags:
+      - Users
+      summary: get 3 last recipe
+      description: get 3 last recipe
+      responses:
+        "200":
+          description: 3 last recipe display
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/randomRecipes'  
+
 components:
   schemas:
     User:
@@ -189,9 +423,9 @@ components:
           description: password conatins at least one number and one special char
           format: password
       example:
-        username: my_name
-        password: my_name@12
-    RecipePreview:
+        username: shalev
+        password: secretpassword
+    SmallRecipePreview:
       type: object
       properties:
         id:
@@ -227,4 +461,304 @@ components:
           type: boolean
           description: indication if the recipe is gluten free
           example: false
+    RecipePreview:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: recipe identifier
+          example: 102
+        title:
+          type: string
+          description: recipe name
+          example: Simple Macaroni and Cheese
+        readyInMinutes:
+          type: integer
+          description: the time takes to make this recipe
+          example: 45
+        image:
+          type: string
+          description: recipe image
+          format: URL
+          example: https://spoonacular.com/recipeimages/655455-566x370.jpg
+        popularity:
+          type: integer
+          description: how many likes got this recipe
+          example: 5987
+        vegetarian:
+          type: boolean
+          description: indication if the recipe is vegetarian
+          example: false
+        vegan:
+          type: boolean
+          description: indication if the recipe is vegan
+          example: false
+        glutenFree:
+          type: boolean
+          description: indication if the recipe is gluten free
+          example: false
+        favorite:
+          type: boolean
+          description: indication if the user mark the recipe as favorite (if user is connect)
+          example: false
+        seen:
+          type: boolean
+          description: indication if the user see the recipe (if user is connect)
+          example: false
+    expandRecipePreviewPersonal:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: recipe identifier
+          example: 102
+        title:
+          type: string
+          description: recipe name
+          example: Simple Macaroni and Cheese
+        readyInMinutes:
+          type: integer
+          description: the time takes to make this recipe
+          example: 45
+        image:
+          type: string
+          description: recipe image
+          format: URL
+          example: https://spoonacular.com/recipeimages/655455-566x370.jpg
+        aggregateLikes:
+          type: integer
+          description: how many likes got this recipe
+          example: 5987
+        vegan:
+          type: boolean
+          description: indication if the recipe is vegan
+          example: false
+        vegetarian:
+          type: boolean
+          description: indication if the recipe is vegetarian
+          example: false
+        glutenFree:
+          type: boolean
+          description: indication if the recipe is gluten free
+          example: false
+        servings:
+          type: integer
+          description: the amount of portions
+          example: 1
+        analyzedInstructions:
+          type: string
+          description: Recipe instructions
+          example: [
+            {
+            "name": "",
+            "steps": [
+                {
+                    "number": 1,
+                    "step": "It's tomato season, so keep it simple while cooking. No need to make heavy sauces with all those gorgeous tomatoes that are bursting with flavor - try a simple 5 ingredient recipe with slow roasted tomatoes, herbs, loads of olive oil and topped with a filet of anchovy! This recipe is straight from the seaside of Le Marche, where we first devoured this delicious antipasto in Numana.On a hot summer's day, we keep the kitchen oven off & make these in our outdoor wood burning oven!Roasted Tomatoes with Anchovies"}]}]
+        extendedIngredients:
+          type: string
+          description: Recipe extendedIngredients
+          example: [
+           {
+            "id": 15001,
+            "aisle": "Seafood",
+            "image": "anchovies.jpg",
+            "consistency": "SOLID",
+            "name": "anchovy filets",
+            "nameClean": "boquerones",
+            "original": "8 high quality anchovy filets, (we use anchovies from Sardegna packed in salt)",
+            "originalName": "high quality anchovy filets, (we use anchovies from Sardegna packed in salt)",
+            "amount": 8,
+            "unit": ""
+           }]
+    expandRecipePreviewExternal:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: recipe identifier
+          example: 102
+        title:
+          type: string
+          description: recipe name
+          example: Simple Macaroni and Cheese
+        image:
+          type: string
+          description: recipe image
+          format: URL
+          example: https://spoonacular.com/recipeimages/655455-566x370.jpg
+        readyInMinutes:
+          type: integer
+          description: the time takes to make this recipe
+          example: 45
+        popularity:
+          type: integer
+          description: how many likes got this recipe
+          example: 5987
+        vegetarian:
+          type: boolean
+          description: indication if the recipe is vegetarian
+          example: false
+        vegan:
+          type: boolean
+          description: indication if the recipe is vegan
+          example: false
+        glutenFree:
+          type: boolean
+          description: indication if the recipe is gluten free
+          example: false
+        servings:
+          type: integer
+          description: the amount of portions
+          example: 2
+        analyzedInstructions:
+          type: string
+          description: Recipe instructions
+          example: [
+            {
+            "name": "",
+            "steps": [
+                {
+                    "number": 1,
+                    "step": "It's tomato season, so keep it simple while cooking. No need to make heavy sauces with all those gorgeous tomatoes that are bursting with flavor - try a simple 5 ingredient recipe with slow roasted tomatoes, herbs, loads of olive oil and topped with a filet of anchovy! This recipe is straight from the seaside of Le Marche, where we first devoured this delicious antipasto in Numana.On a hot summer's day, we keep the kitchen oven off & make these in our outdoor wood burning oven!Roasted Tomatoes with Anchovies"}]}]
+        extendedIngredients:
+          type: string
+          description: Recipe extendedIngredients
+          example: [
+           {
+            "id": 15001,
+            "aisle": "Seafood",
+            "image": "anchovies.jpg",
+            "consistency": "SOLID",
+            "name": "anchovy filets",
+            "nameClean": "boquerones",
+            "original": "8 high quality anchovy filets, (we use anchovies from Sardegna packed in salt)",
+            "originalName": "high quality anchovy filets, (we use anchovies from Sardegna packed in salt)",
+            "amount": 8,
+            "unit": ""
+           }]
+        favorite:
+          type: boolean
+          description: indication if the recipe is favorite to user
+          example: true
+        seen:
+          type: boolean
+          description: indication if the user see the recipe
+          example: true
+    listResult:
+      type: array
+      items:
+        $ref: '#/components/schemas/expandRecipePreviewExternal'
+    randomRecipes:
+      type: array
+      items:
+        $ref: '#/components/schemas/RecipePreview'
+    listRecipes:
+      type: array
+      items:
+        $ref: '#/components/schemas/SmallRecipePreview'
+    addPersonalRecipes:
+      type: object
+      properties:
+        user_id:
+          type: integer
+          description: user identifier
+          example: 2
+        title:
+          type: string
+          description: recipe name
+          example: Simple Macaroni and Cheese
+        image:
+          type: string
+          description: recipe image
+          format: URL
+          example: https://spoonacular.com/recipeimages/655455-566x370.jpg
+        readyInMinutes:
+          type: integer
+          description: the time takes to make this recipe
+          example: 45
+        aggregateLikes:
+          type: integer
+          description: how many likes got this recipe
+          example: 5987
+        vegetarian:
+          type: boolean
+          description: indication if the recipe is vegetarian
+          example: false
+        vegan:
+          type: boolean
+          description: indication if the recipe is vegan
+          example: false
+        glutenFree:
+          type: boolean
+          description: indication if the recipe is gluten free
+          example: false
+        servings:
+          type: integer
+          description: the amount of portions
+          example: 2
+        analyzedInstructions:
+          type: string
+          description: Recipe instructions
+          example: [
+            {
+            "name": "",
+            "steps": [
+                {
+                    "number": 1,
+                    "step": "It's tomato season, so keep it simple while cooking. No need to make heavy sauces with all those gorgeous tomatoes that are bursting with flavor - try a simple 5 ingredient recipe with slow roasted tomatoes, herbs, loads of olive oil and topped with a filet of anchovy! This recipe is straight from the seaside of Le Marche, where we first devoured this delicious antipasto in Numana.On a hot summer's day, we keep the kitchen oven off & make these in our outdoor wood burning oven!Roasted Tomatoes with Anchovies"}]}]
+        extendedIngredients:
+          type: string
+          description: Recipe extendedIngredients
+          example: [
+           {
+            "id": 15001,
+            "aisle": "Seafood",
+            "image": "anchovies.jpg",
+            "consistency": "SOLID",
+            "name": "anchovy filets",
+            "nameClean": "boquerones",
+            "original": "8 high quality anchovy filets, (we use anchovies from Sardegna packed in salt)",
+            "originalName": "high quality anchovy filets, (we use anchovies from Sardegna packed in salt)",
+            "amount": 8,
+            "unit": ""
+           }]
+    FamilyRecipes:
+      type: object
+      properties:
+        name:
+          type: string
+          description: name of recipes
+          example: pasta
+        owner:
+          type: string
+          description: recipe's owner
+          example: Mom
+        when_used:
+          type: string
+          description: when recipe used
+          example: Shabat
+        ingredients:
+          type: string
+          description: Recipe extendedIngredients
+          example: Sugar, salt, flour
+        analyzedInstructions:
+          type: string
+          description: Recipe instructions
+          example: [
+            {
+            "name": "",
+            "steps": [
+                {
+                    "number": 1,
+                    "step": "It's tomato season, so keep it simple while cooking. No need to make heavy sauces with all those gorgeous tomatoes that are bursting with flavor - try a simple 5 ingredient recipe with slow roasted tomatoes, herbs, loads of olive oil and topped with a filet of anchovy! This recipe is straight from the seaside of Le Marche, where we first devoured this delicious antipasto in Numana.On a hot summer's day, we keep the kitchen oven off & make these in our outdoor wood burning oven!Roasted Tomatoes with Anchovies"}]}]
+        image:
+          type: string
+          description: recipe image
+          format: URL
+          example: https://spoonacular.com/recipeimages/655455-566x370.jpg
+    listFamilyRecipes:
+      type: array
+      items:
+        $ref: '#/components/schemas/FamilyRecipes'
   
