@@ -726,7 +726,7 @@ components:
     FamilyRecipes:
       type: object
       properties:
-        name:
+        title:
           type: string
           description: name of recipes
           example: pasta

@@ -122,11 +122,11 @@ async function getRecipeDetails(recipe_id) {
     let { id, title, readyInMinutes, image, aggregateLikes, vegan, vegetarian, glutenFree } = recipe_info.data;
 
     return {
-        id: id,
+        recipe_id: id,
         title: title,
         readyInMinutes: readyInMinutes,
         image: image,
-        popularity: aggregateLikes,
+        aggregateLikes: aggregateLikes,
         vegan: vegan,
         vegetarian: vegetarian,
         glutenFree: glutenFree,
@@ -178,7 +178,7 @@ async function extractPreviewRecipeDetails(recipes_info, user_id) {
       title: title,
       readyInMinutes: readyInMinutes,
       image: image,
-      popularity: aggregateLikes,
+      aggregateLikes: aggregateLikes,
       vegan: vegan,
       vegetarian: vegetarian,
       glutenFree: glutenFree,
@@ -233,11 +233,11 @@ async function recipeDetails(recipes_info, user_id) {
     }
     
     const processedRecipe = {
-      id: id,
+      recipe_id: id,
       title: title,
       readyInMinutes: readyInMinutes,
       image: image,
-      popularity: aggregateLikes,
+      aggregateLikes: aggregateLikes,
       vegan: vegan,
       vegetarian: vegetarian,
       glutenFree: glutenFree,
@@ -297,7 +297,7 @@ async function getRecipepersonalExpandedDetails(recipe_id1,user_id1) {
   let { recipe_id,user_id, title, readyInMinutes, image, aggregateLikes, vegan, vegetarian, glutenFree, servings,analyzedInstructions,extendedIngredients} = row_details[0];
   
   return {
-      id: recipe_id,
+      recipe_id: recipe_id,
       title: title,
       readyInMinutes: readyInMinutes,
       image: image,
@@ -316,11 +316,11 @@ async function getpersonalRecipeDetails(recipe_id1,user_id1) {
   let { recipe_id,user_id, title, readyInMinutes, image, aggregateLikes, vegan, vegetarian, glutenFree, servings,analyzedInstructions,extendedIngredients} = row_details[0];
 
   return {
-      id: recipe_id,
+      recipe_id: recipe_id,
       title: title,
       readyInMinutes: readyInMinutes,
       image: image,
-      popularity: aggregateLikes,
+      aggregateLikes: aggregateLikes,
       vegan: vegan,
       vegetarian: vegetarian,
       glutenFree: glutenFree,

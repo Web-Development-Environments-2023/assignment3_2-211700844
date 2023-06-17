@@ -59,6 +59,14 @@ router.post('/cleanrecipetomeal', async (req,res,next) => {
  * END BONUS!!!!!
  */
 
+router.get('/userid', async (req,res,next) => {
+  try{
+    const user_id = req.session.user_id;
+    res.status(200).send(user_id+"");
+  } catch(error){
+    next(error); 
+  }
+});
 
 /**
  * Q11- This path returns all users personal recipes.
@@ -175,7 +183,7 @@ router.get("/getThreeLast", async (req, res, next) => {
 router.post('/addtofavorites', async (req,res,next) => {
   try{
     const user_id = req.session.user_id;
-    const recipe_id = req.body.recipeId;
+    const recipe_id = req.body.recipe_id;
     await user_utils.markAsFavorite(user_id,recipe_id);
     res.status(200).send("The Recipe successfully saved as favorite");
     } catch(error){
