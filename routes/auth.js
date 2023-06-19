@@ -9,6 +9,7 @@ router.post("/Register", async (req, res, next) => {
     // parameters exists
     // valid parameters
     // username exists
+    console.log("regisretttttt")
     let user_details = {
       username: req.body.username,
       firstname: req.body.firstname,
