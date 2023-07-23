@@ -1,9 +1,21 @@
+// Required modules and variables
 const axios = require("axios");
 const nodemon = require("nodemon");
 const DButils = require("./DButils");
 const api_domain = "https://api.spoonacular.com/recipes";
 
 
+/**
+ * Retrieves search results based on the provided query and filters.
+ * @param {number} user_id - The ID of the user performing the search (optional).
+ * @param {string} query - The search query.
+ * @param {string} sort - The sorting method for the results (optional).
+ * @param {number} number_of_results - The number of results to retrieve.
+ * @param {string} cuisine - The cuisine filter (optional).
+ * @param {string} diet - The diet filter (optional).
+ * @param {string} intolerance - The intolerance filter (optional).
+ * @returns {Array} - An array of recipes containing relevant details for preview.
+ */
 async function getSearchResults(user_id, query, sort, number_of_results, cuisine, diet, intolerance) {
   let response = await getRecipesFromSearch(query,sort, number_of_results, cuisine, diet, intolerance);
   recipes_arr = response.data.results;
@@ -25,7 +37,11 @@ async function getSearchResults(user_id, query, sort, number_of_results, cuisine
   return extractPreviewRecipeDetails(recipes_splitted,user_id);
 }
 
-// Get recipe information for group of ids 
+/**
+ * Retrieves recipe information for a group of recipe IDs.
+ * @param {string} ids - Comma-separated string containing recipe IDs.
+ * @returns {Object} - Information for the specified recipes.
+ */
 async function getRecipesInfoBulks(ids) {
   return await axios.get(`${api_domain}/informationBulk`, {
       params: {
@@ -35,7 +51,16 @@ async function getRecipesInfoBulks(ids) {
   });
 }
 
-// search for recipes by using: given_query as string to search, return  number_of_wanted_results results
+/**
+ * Searches for recipes based on the provided query and filters.
+ * @param {string} query - The search query.
+ * @param {string} sort - The sorting method for the results (optional).
+ * @param {number} number_of_results - The number of results to retrieve.
+ * @param {string} cuisine - The cuisine filter (optional).
+ * @param {string} diet - The diet filter (optional).
+ * @param {string} intolerance - The intolerance filter (optional).
+ * @returns {Object} - Search results with recipe information.
+ */
 async function getRecipesFromSearch(query, sort, number_of_results, cuisine, diet, intolerance) {
   if(sort){
     return await axios.get(`${api_domain}/complexSearch`, {
@@ -64,8 +89,9 @@ async function getRecipesFromSearch(query, sort, number_of_results, cuisine, die
 
 
 /**
- * Get recipes list from spooncular response and extract the relevant recipe data for preview
- * @param {*} recipes_info 
+ * Retrieves recipe information for a specific recipe ID.
+ * @param {string} recipe_id - The ID of the recipe to fetch details for.
+ * @returns {Object} - Detailed information about the recipe.
  */
 async function getRecipeInformation(recipe_id) {
   return await axios.get(`${api_domain}/${recipe_id}/information`, {
@@ -76,7 +102,12 @@ async function getRecipeInformation(recipe_id) {
   });
 }
 
-// get the preview of list of recipes
+/**
+ * Retrieves a preview of a list of recipes with limited details.
+ * @param {Array} recipes_ids_list - An array of recipe IDs to fetch preview details for.
+ * @param {number} user_id - The ID of the user requesting the preview (optional).
+ * @returns {Array} - An array of recipes containing preview details.
+ */
 async function getRecipesPreview(recipes_ids_list,user_id) {
   let promises = [];
   recipes_ids_list.map((id) => {
@@ -94,7 +125,9 @@ async function getRecipesPreview(recipes_ids_list,user_id) {
 }
 
 /**
- * @returns three random recipes.
+ * Retrieves three random recipes.
+ * @param {number} user_id - The ID of the user requesting the recipes (optional).
+ * @returns {Array} - An array of three random recipes with preview details.
  */
 async function getRandomRecipes(user_id) {
   const response = await axios.get(`${api_domain}/random`, {
@@ -107,16 +140,31 @@ async function getRandomRecipes(user_id) {
   return recipeDetails([recipes_arr[0],recipes_arr[1],recipes_arr[2]],user_id);
 }
 
+/**
+ * Checks if the user has seen a specific recipe.
+ * @param {number} user_id - The ID of the user.
+ * @param {string} recipe_id - The ID of the recipe to check.
+ * @returns {Array} - An array with information about whether the user has seen the recipe.
+ */
 async function userSeenRecipe(user_id,recipe_id){
   return await DButils.execQuery(`select * from seen where user_id='${user_id}' and recipe_id='${recipe_id}'`);
 }
 
-
+/**
+ * Checks if the user has marked a recipe as a favorite.
+ * @param {number} user_id - The ID of the user.
+ * @param {string} recipe_id - The ID of the recipe to check.
+ * @returns {Array} - An array with information about whether the user has marked the recipe as a favorite.
+ */
 async function userFavoriteRecipe(user_id, recipe_id) {
   return await DButils.execQuery(`select * from favoriterecipes where user_id='${user_id}' and recipe_id='${recipe_id}'`);
 }
 
-
+/**
+ * Retrieves detailed information for a specific recipe.
+ * @param {string} recipe_id - The ID of the recipe to fetch details for.
+ * @returns {Object} - Detailed information about the recipe.
+ */
 async function getRecipeDetails(recipe_id) {
     let recipe_info = await getRecipeInformation(recipe_id);
     let { id, title, readyInMinutes, image, aggregateLikes, vegan, vegetarian, glutenFree } = recipe_info.data;
@@ -133,7 +181,12 @@ async function getRecipeDetails(recipe_id) {
     }
 }
 
-
+/**
+ * Extracts relevant details from the Spoonacular response for recipe preview.
+ * @param {Array} recipes_info - An array of recipe information from the Spoonacular API.
+ * @param {number} user_id - The ID of the user requesting the preview (optional).
+ * @returns {Array} - An array of recipes containing relevant details for preview.
+ */
 async function extractPreviewRecipeDetails(recipes_info, user_id) {
   const processedRecipes = [];
   
@@ -193,15 +246,21 @@ async function extractPreviewRecipeDetails(recipes_info, user_id) {
   return processedRecipes;
 }
 
+/**
+ * Process recipe details and user-specific information to create a list of processed recipes.
+ * This function takes in an array of recipe information and enriches it with user-specific details
+ * like whether the recipe is marked as favorite or seen by the user.
+ * @param {Array} recipes_info - An array of recipe information from the Spoonacular API.
+ * @param {number} user_id - The ID of the user requesting the processed recipe details (optional).
+ * @returns {Array} - An array of processed recipes containing relevant details and user-specific information.
+ */
 async function recipeDetails(recipes_info, user_id) {
   const processedRecipes = [];
-  
   for (let i = 0; i < recipes_info.length; i++) {
     let data = recipes_info[i];
     if (recipes_info[i].data) {
       data = recipes_info[i].data;
-    }
-    
+    }   
     const {
       id,
       title,
@@ -213,8 +272,7 @@ async function recipeDetails(recipes_info, user_id) {
       glutenFree,
       analyzedInstructions,
       extendedIngredients
-    } = data;
-    
+    } = data;   
     let favorite = undefined;
     let seen= undefined;
     if (user_id) {
@@ -230,8 +288,7 @@ async function recipeDetails(recipes_info, user_id) {
       } else {
         seen = true;
       }
-    }
-    
+    }   
     const processedRecipe = {
       recipe_id: id,
       title: title,
@@ -246,12 +303,17 @@ async function recipeDetails(recipes_info, user_id) {
     };
     
     processedRecipes.push(processedRecipe);
-  }
-  
+  } 
   return processedRecipes;
 }
 
-// Get expanded recipe data - input = recipe ID, output = preview details + servings amount, cooking instructions, ingredients list & amounts
+/**
+ * Retrieves expanded recipe data, including servings amount, cooking instructions,
+ * ingredients list, and amounts for a specific recipe.
+ * @param {number} user_id - The ID of the user requesting the expanded details (optional).
+ * @param {string} recipe_id - The ID of the recipe to fetch expanded details for.
+ * @returns {Object} - Detailed information about the recipe with expanded details.
+ */
 async function getRecipeExpandedDetails(user_id,recipe_id) {
   let recipe_info = await getRecipeInformation(recipe_id);
 
@@ -291,7 +353,13 @@ async function getRecipeExpandedDetails(user_id,recipe_id) {
   }
 }
 
-// Get expanded recipe data of personal - input = recipe ID, output = preview details + servings amount, cooking instructions, ingredients list & amounts
+/**
+ * Retrieves expanded personal recipe data, including servings amount, cooking instructions,
+ * ingredients list, and amounts for a specific personal recipe.
+ * @param {string} recipe_id1 - The ID of the personal recipe to fetch details for.
+ * @param {number} user_id1 - The ID of the user requesting the expanded details.
+ * @returns {Object} - Detailed information about the personal recipe with expanded details.
+ */
 async function getRecipepersonalExpandedDetails(recipe_id1,user_id1) {
   const row_details=await DButils.execQuery(`select * from personalrecipes where user_id='${user_id1}' and recipe_id='${recipe_id1}'`);
   let { recipe_id,user_id, title, readyInMinutes, image, aggregateLikes, vegan, vegetarian, glutenFree, servings,analyzedInstructions,extendedIngredients} = row_details[0];
@@ -311,6 +379,12 @@ async function getRecipepersonalExpandedDetails(recipe_id1,user_id1) {
   }
 }
 
+/**
+ * Retrieves detailed information for a specific personal recipe.
+ * @param {string} recipe_id1 - The ID of the personal recipe to fetch details for.
+ * @param {number} user_id1 - The ID of the user requesting the details.
+ * @returns {Object} - Detailed information about the personal recipe.
+ */
 async function getpersonalRecipeDetails(recipe_id1,user_id1) {
   const row_details=await DButils.execQuery(`select * from personalrecipes where user_id='${user_id1}' and recipe_id='${recipe_id1}'`);
   let { recipe_id,user_id, title, readyInMinutes, image, aggregateLikes, vegan, vegetarian, glutenFree, servings,analyzedInstructions,extendedIngredients} = row_details[0];
@@ -328,7 +402,7 @@ async function getpersonalRecipeDetails(recipe_id1,user_id1) {
 }
 
 
-
+// Exported functions
 exports.getRecipeDetails = getRecipeDetails;
 exports.getRandomRecipes = getRandomRecipes;
 exports.getRecipesPreview = getRecipesPreview;
